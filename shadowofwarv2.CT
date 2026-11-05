@@ -44,7 +44,7 @@ ret_hp:
 registersymbol(HP_Read)
 
 
-// --- 2. MIGHT JUGADOR (Estable y sin parpadeos) ---
+// --- 2. MIGHT JUGADOR (Inmune a golpes y penalizaciones de daño) ---
 aobscanmodule(Might,ShadowOfWar.exe,F3 0F 10 82 D0 02 00 00)
 alloc(new_might,$1000,Might)
 label(cod_might)
@@ -60,7 +60,11 @@ new_might:
   jne cod_might
   test rdx,rdx
   je cod_might
-  // Fuerza estática del Might actual al valor máximo de la barra (offset 348)
+  
+  // Anula cualquier penalización de might por recibir golpes (offset d8)
+  mov dword ptr [rdx+000000D8],0
+  
+  // Mantiene la barra fija al máximo absoluto
   mov rax,[rdx+00000348]
   mov [rdx+000002D0],rax
 
