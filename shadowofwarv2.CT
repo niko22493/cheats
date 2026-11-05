@@ -8,245 +8,223 @@
       <Color>0000FF</Color>
       <VariableType>Auto Assembler Script</VariableType>
       <AssemblerScript>{ Game   : ShadowOfWar.exe
-  Author : Reverser / Adaptado con rutinas nativas estables para DeckyTrainers
+  Author : Reverser / Optimizado para DeckyTrainers
 }
 
 [ENABLE]
 
-// --- ASIGNACIÓN DE MEMORIA Y BANDERAS ---
-alloc(player_base,8)
-registersymbol(player_base)
-
-alloc(t_hp,8)
+// --- 1. VIDA INFINITA ---
+aobscanmodule(HP_Read,ShadowOfWar.exe,F3 0F 10 80 2C 04 00 00 48)
+alloc(new_hp,$1000,HP_Read)
+label(cod_hp)
+label(ret_hp)
 registersymbol(t_hp)
+alloc(t_hp,8)
 t_hp:
 dd 0
 
-alloc(t_might,8)
+new_hp:
+  push rax
+  cmp [t_hp],1
+  jne cod_hp
+  mov rax,[rcx+000026A8]
+  test rax,rax
+  je cod_hp
+  movss xmm1,[rax+00000428]
+  movss [rax+0000042C],xmm1
+cod_hp:
+  pop rax
+  movss xmm0,[rax+0000042C]
+  jmp ret_hp
+
+HP_Read:
+  jmp new_hp
+  nop 3
+ret_hp:
+registersymbol(HP_Read)
+
+
+// --- 2. MIGHT JUGADOR ---
+aobscanmodule(Might,ShadowOfWar.exe,F3 0F 10 82 D0 02 00 00)
+alloc(new_might,$1000,Might)
+label(cod_might)
+label(ret_might)
 registersymbol(t_might)
+alloc(t_might,8)
 t_might:
 dd 0
 
-alloc(t_mmight,8)
+new_might:
+  push rax
+  cmp [t_might],1
+  jne cod_might
+  test rdx,rdx
+  je cod_might
+  mov dword ptr [rdx+000000D8],0
+  mov rax,[rdx+00000348]
+  mov [rdx+000002D0],rax
+cod_might:
+  pop rax
+  movss xmm0,[rdx+000002D0]
+  jmp ret_might
+
+Might:
+  jmp new_might
+  nop 3
+ret_might:
+registersymbol(Might)
+
+
+// --- 3. MIGHT MONTURA ---
+aobscanmodule(mountMight,ShadowOfWar.exe,F3 0F 5D B1 30 03 00 00)
+alloc(new_mmight,$1000,mountMight)
+label(cod_mmight)
+label(ret_mmight)
 registersymbol(t_mmight)
+alloc(t_mmight,8)
 t_mmight:
 dd 0
 
-alloc(t_arrow,8)
+new_mmight:
+  cmp [t_mmight],1
+  jne cod_mmight
+  test rcx,rcx
+  je cod_mmight
+  movss xmm6,[rcx+00000330]
+cod_mmight:
+  minss xmm6,[rcx+00000330]
+  jmp ret_mmight
+
+mountMight:
+  jmp new_mmight
+  nop 3
+ret_mmight:
+registersymbol(mountMight)
+
+
+// --- 4. FLECHAS INFINITAS ---
+aobscanmodule(Arrow,ShadowOfWar.exe,3b ?? 0f 84 ?? ?? ?? ?? 89 ?? 88 00 00 00 49 ?? ?? e8 ?? ?? ?? ?? 48 ?? ?? 48 ?? ?? e8)
+alloc(new_arrow,$1000,Arrow)
+label(cod_arrow)
+label(ret_arrow)
 registersymbol(t_arrow)
+alloc(t_arrow,8)
 t_arrow:
 dd 0
 
-alloc(t_focus,8)
+new_arrow:
+  cmp [t_arrow],1
+  jne cod_arrow
+  mov edx,[rcx+00000054]
+cod_arrow:
+  mov [rcx+00000088],edx
+  mov rdx,r8
+  jmp ret_arrow
+
+Arrow+8:
+  jmp new_arrow
+  nop
+ret_arrow:
+registersymbol(Arrow)
+
+
+// --- 5. FOCUS INFINITO ---
+aobscanmodule(Focus,ShadowOfWar.exe,F3 0F 11 9B 3C 02 00 00)
+alloc(new_focus,$1000,Focus)
+label(cod_focus)
+label(ret_focus)
 registersymbol(t_focus)
+alloc(t_focus,8)
 t_focus:
 dd 0
 
-alloc(t_combo,8)
+new_focus:
+  cmp [t_focus],1
+  jne cod_focus
+  movss xmm3,[rbx+000000A8]
+cod_focus:
+  movss [rbx+0000023C],xmm3
+  jmp ret_focus
+
+Focus:
+  jmp new_focus
+  nop 3
+ret_focus:
+registersymbol(Focus)
+
+
+// --- 6. HIT COMBO ---
+aobscanmodule(hitCounter,ShadowOfWar.exe,66 89 B7 88 01 00 00)
+alloc(new_combo,$1000,hitCounter)
+label(cod_combo)
+label(ret_combo)
 registersymbol(t_combo)
+alloc(t_combo,8)
 t_combo:
 dd 0
 
-// --- ESCANEO DE FUNCIONES NATIVAS ---
-aobscanmodule(SetMight,ShadowOfWar.exe,48 8B C4 48 89 58 08 48 89 70 10 48 89 78 18 55 48 8D 68 A1 48 81 EC A0 00 00 00 0F)
-registersymbol(SetMight)
+new_combo:
+  cmp [t_combo],1
+  jne cod_combo
+  cmp [rdi+170],0
+  je cod_combo
+  cmp si,[rdi+00000188]
+  jge cod_combo
+  mov si,[rdi+00000188]
+cod_combo:
+  mov [rdi+00000188],si
+  jmp ret_combo
 
-aobscanmodule(SetMountMight,ShadowOfWar.exe,40 53 48 83 EC 50 F3 0F 10 A1)
-registersymbol(SetMountMight)
-
-aobscanmodule(SetFocus,ShadowOfWar.exe,48 83 EC 28 80 3D * * * * 00 4C 8B D1)
-registersymbol(SetFocus)
-
-// Gancho principal de actualización del jugador
-aobscanmodule(Activate,ShadowOfWar.exe,48 8B 80 C8 0A)
-registersymbol(Activate)
-
-alloc(newmem,2048,Activate)
-label(returnhere)
-label(originalcode)
-label(exit)
-label(check_hp)
-label(check_might)
-label(check_mmight)
-label(check_focus)
-label(check_combo)
-
-newmem:
-  push rax
-  push rcx
-  push rdx
-  push r8
-  push r9
-  
-  // Obtiene el puntero base del jugador de forma idéntica a la tabla de referencia
-  mov rax,[rax+00000AC0]
-  test rax,rax
-  je originalcode
-  mov rax,[rax+00000888]
-  test rax,rax
-  je originalcode
-  mov [player_base],rax
-
-  // Ejecuta las rutinas según las banderas activadas
-  call check_hp
-  call check_might
-  call check_mmight
-  call check_focus
-  call check_combo
-
-originalcode:
-  pop r9
-  pop r8
-  pop rdx
-  pop rcx
-  pop rax
-  mov rax,[rax+00000AC8]
-
-exit:
-  jmp returnhere
-
-
-// --- RUTINA 1: VIDA INFINITA ---
-check_hp:
-  push rax
-  cmp [t_hp],0
-  je @F
-  mov rax,[player_base]
-  test rax,rax
-  je @F
-  mov rax,[rax+000026A8] // Puntero interno del héroe
-  test rax,rax
-  je @F
-  movss xmm1,[rax+00000428] // Max HP
-  movss [rax+0000042C],xmm1 // Current HP fijado al máximo al instante
-@@:
-  pop rax
-  ret
-
-
-// --- RUTINA 2: MIGHT JUGADOR (Usa la función nativa SetMight) ---
-check_might:
-  push rax
-  cmp [t_might],0
-  je @F
-  mov rax,[player_base]
-  test rax,rax
-  je @F
-  mov rax,[rax+000026A8]
-  test rax,rax
-  je @F
-  mov rcx,[rax+00000338]
-  test rcx,rcx
-  je @F
-  movss xmm1,[rcx+000003A8]
-  comiss xmm1,[rcx+000002D0]
-  jle @F
-  xor r8d,r8d
-  sub rsp,20
-  call SetMight
-  add rsp,20
-@@:
-  pop rax
-  ret
-
-
-// --- RUTINA 3: MIGHT MONTURA ---
-check_mmight:
-  push rax
-  cmp [t_mmight],0
-  je @F
-  mov rax,[player_base]
-  test rax,rax
-  je @F
-  mov rax,[rax+00002578] // Puntero de montura
-  test rax,rax
-  je @F
-  mov rcx,[rax+00000348]
-  test rcx,rcx
-  je @F
-  movss xmm1,[rcx+00000330]
-  subss xmm1,[rcx+000002D8]
-  sub rsp,20
-  call SetMountMight
-  add rsp,20
-@@:
-  pop rax
-  ret
-
-
-// --- RUTINA 4: FOCUS INFINITO ---
-check_focus:
-  push rax
-  cmp [t_focus],0
-  je @F
-  mov rax,[player_base]
-  test rax,rax
-  je @F
-  mov rax,[rax+000026A8]
-  test rax,rax
-  je @F
-  mov rcx,[rax+00000300]
-  test rcx,rcx
-  je @F
-  movss xmm1,[rcx+000000A8]
-  subss xmm1,[rcx+0000023C]
-  sub rsp,20
-  call SetFocus
-  add rsp,20
-@@:
-  pop rax
-  ret
-
-
-// --- RUTINA 5: HIT COMBO ---
-check_combo:
-  push rax
-  cmp [t_combo],0
-  je @F
-  mov rax,[player_base]
-  test rax,rax
-  je @F
-  mov rax,[rax+000026A8]
-  test rax,rax
-  je @F
-  // Bloqueo de reseteo de combo en el offset de racha
-  cmp [rax+00000188],0
-  je @F
-@@:
-  pop rax
-  ret
-
-
-Activate:
-  jmp newmem
+hitCounter:
+  jmp new_combo
   nop 2
-returnhere:
+ret_combo:
+registersymbol(hitCounter)
+
 
 [DISABLE]
 
-dealloc(player_base)
-unregistersymbol(player_base)
-dealloc(t_hp)
+HP_Read:
+  db F3 0F 10 80 2C 04 00 00
+unregistersymbol(HP_Read)
+dealloc(new_hp)
 unregistersymbol(t_hp)
-dealloc(t_might)
+dealloc(t_hp)
+
+Might:
+  db F3 0F 10 82 D0 02 00 00
+unregistersymbol(Might)
+dealloc(new_might)
 unregistersymbol(t_might)
-dealloc(t_mmight)
+dealloc(t_might)
+
+mountMight:
+  db F3 0F 5D B1 30 03 00 00
+unregistersymbol(mountMight)
+dealloc(new_mmight)
 unregistersymbol(t_mmight)
-dealloc(t_arrow)
+dealloc(t_mmight)
+
+Arrow+8:
+  db 89 91 88 00 00 00
+unregistersymbol(Arrow)
+dealloc(new_arrow)
 unregistersymbol(t_arrow)
-dealloc(t_focus)
+dealloc(t_arrow)
+
+Focus:
+  db F3 0F 11 9B 3C 02 00 00
+unregistersymbol(Focus)
+dealloc(new_focus)
 unregistersymbol(t_focus)
-dealloc(t_combo)
+dealloc(t_focus)
+
+hitCounter:
+  db 66 89 B7 88 01 00 00
+unregistersymbol(hitCounter)
+dealloc(new_combo)
 unregistersymbol(t_combo)
-
-unregistersymbol(SetMight)
-unregistersymbol(SetMountMight)
-unregistersymbol(SetFocus)
-unregistersymbol(Activate)
-dealloc(newmem)
-
-Activate:
-  db 48 8B 80 C8 0A 00 00
+dealloc(t_combo)
 </AssemblerScript>
       <CheatEntries>
         <CheatEntry>
@@ -287,6 +265,18 @@ t_mmight:
         </CheatEntry>
         <CheatEntry>
           <ID>1004</ID>
+          <Description>"Flechas Infinitas"</Description>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>[ENABLE]
+t_arrow:
+  dd 1
+[DISABLE]
+t_arrow:
+  dd 0
+          </AssemblerScript>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>1005</ID>
           <Description>"Focus Infinito"</Description>
           <VariableType>Auto Assembler Script</VariableType>
           <AssemblerScript>[ENABLE]
@@ -298,7 +288,7 @@ t_focus:
           </AssemblerScript>
         </CheatEntry>
         <CheatEntry>
-          <ID>1005</ID>
+          <ID>1006</ID>
           <Description>"Hit Combo Infinito"</Description>
           <VariableType>Auto Assembler Script</VariableType>
           <AssemblerScript>[ENABLE]
