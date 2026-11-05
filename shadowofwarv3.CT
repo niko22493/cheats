@@ -1,0 +1,413 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CheatTable CheatEngineTableVersion="45">
+  <CheatEntries>
+    <CheatEntry>
+      <ID>999</ID>
+      <Description>"Script General - Shadow of War (Activar primero)"</Description>
+      <Options moHideChildren="1"/>
+      <Color>0000FF</Color>
+      <VariableType>Auto Assembler Script</VariableType>
+      <AssemblerScript>{ Game   : ShadowOfWar.exe
+  Author : Adaptado y traducido para DeckyTrainers (Script Maestro)
+}
+
+[ENABLE]
+
+// --- 1. PERSONAJE [ESTADÍSTICAS / DETECCIÓN / SALUD / XP] ---
+aobscanmodule(_character,ShadowOfWar.exe,F3 0F 10 80 2C 04 00 00 48)
+alloc(new_char,$1000,_character)
+registersymbol(_stats)
+alloc(_stats,8)
+label(cod_char)
+label(ret_char)
+
+registersymbol(t_det)
+alloc(t_det,8)
+t_det:
+dd 0
+
+registersymbol(t_hp)
+alloc(t_hp,8)
+t_hp:
+dd 0
+
+new_char:
+  mov [_stats],rax
+  
+  // Detección / Invisibilidad
+  cmp [t_det],1
+  jne @F
+  mov byte ptr [rax+4a7],0 // Invisible (0 = Oculto)
+@@:
+
+  // Salud Infinita
+  cmp [t_hp],1
+  jne cod_char
+  movss xmm1,[rax+428] // Max HP
+  movss [rax+42c],xmm1 // Current HP fijado al máximo
+
+cod_char:
+  movss xmm0,[rax+42c]
+  jmp ret_char
+
+_character:
+  jmp new_char
+  nop 3
+ret_char:
+registersymbol(_character)
+
+
+// --- 2. COMBATE [DAÑO / MUERTE DE UN GOLPE] ---
+aobscanmodule(_damage_one_hit_kill,ShadowOfWar.exe,F3 41 0F 10 8E 2C 04 00 00)
+alloc(new_dmg,$1000,_damage_one_hit_kill)
+label(cod_dmg)
+label(ret_dmg)
+registersymbol(t_dmg)
+alloc(t_dmg,8)
+t_dmg:
+dd 0
+
+new_dmg:
+  cmp [t_dmg],1
+  jne cod_dmg
+  mov [r14+42c],(float)0 // Deja la salud del enemigo a 0 de un golpe
+cod_dmg:
+  movss xmm1,[r14+42c]
+  jmp ret_dmg
+
+_damage_one_hit_kill:
+  jmp new_dmg
+  nop 4
+ret_dmg:
+registersymbol(_damage_one_hit_kill)
+
+
+// --- 3. COMBATE [COMBO DE GOLPES] ---
+aobscanmodule(_hit_combo,ShadowOfWar.exe,0F BF 80 88 01 00 00 C3 CC CC CC 33)
+alloc(new_combo,$1000,_hit_combo)
+label(cod_combo)
+label(ret_combo)
+registersymbol(t_combo)
+alloc(t_combo,8)
+t_combo:
+dd 0
+
+new_combo:
+  cmp [t_combo],1
+  jne cod_combo
+  mov [rax+188],(int)999 // Fija el combo a 999
+cod_combo:
+  movsx eax,word ptr [rax+188]
+  jmp ret_combo
+
+_hit_combo:
+  jmp new_combo
+  nop 2
+ret_combo:
+registersymbol(_hit_combo)
+
+
+// --- 4. BARRAS [MIGHT / PODER] ---
+aobscanmodule(_might_gauge_combo,ShadowOfWar.exe,F3 0F 10 A1 D8 02 00 00)
+aobscanmodule(_might_gauge_single,ShadowOfWar.exe,F3 0F 10 81 D0 02 00 00 0F)
+alloc(new_might_c,$1000,_might_gauge_combo)
+alloc(new_might_s,$1000,_might_gauge_single)
+label(ret_mc ret_ms)
+registersymbol(t_might)
+alloc(t_might,8)
+t_might:
+dd 0
+
+new_might_c:
+  cmp [t_might],1
+  jne @F
+  mov [rcx+2d8],(float)999
+@@:
+  movss xmm4,[rcx+2d8]
+  jmp ret_mc
+
+_might_gauge_combo:
+  jmp new_might_c
+  nop 3
+ret_mc:
+
+new_might_s:
+  cmp [t_might],1
+  jne @F
+  mov [rcx+2d0],(float)999
+  mov [rcx+348],(float)999
+  mov [rcx+3a8],(float)999
+@@:
+  movss xmm0,[rcx+2d0]
+  jmp ret_ms
+
+_might_gauge_single:
+  jmp new_might_s
+  nop 3
+ret_ms:
+registersymbol(_might_gauge_combo _might_gauge_single)
+
+
+// --- 5. BARRAS [FURIA ÉLFICA / ELVEN RAGE] ---
+aobscanmodule(_elven_rage_meter_decrease,ShadowOfWar.exe,F3 0F 10 8B 10 03 00 00)
+aobscanmodule(_elven_rage_meter_increase,ShadowOfWar.exe,F3 0F 11 A9 10 03 00 00)
+alloc(new_rage_dec,$1000,_elven_rage_meter_decrease)
+alloc(new_rage_inc,$1000,_elven_rage_meter_increase)
+label(ret_rd ret_ri)
+registersymbol(t_rage)
+alloc(t_rage,8)
+t_rage:
+dd 0
+
+new_rage_dec:
+  cmp [t_rage],1
+  jne @F
+  mov [rbx+310],(float)999
+@@:
+  movss xmm1,[rbx+310]
+  jmp ret_rd
+
+_elven_rage_meter_decrease:
+  jmp new_rage_dec
+  nop 3
+ret_rd:
+
+new_rage_inc:
+  cmp [t_rage],1
+  jne @F
+  mov [rcx+310],(float)999
+@@:
+  movss [rcx+310],xmm5
+  jmp ret_ri
+
+_elven_rage_meter_increase:
+  jmp new_rage_inc
+  nop 3
+ret_ri:
+registersymbol(_elven_rage_meter_decrease _elven_rage_meter_increase)
+
+
+// --- 6. BARRAS [FOCUS / CONCENTRACIÓN] ---
+aobscanmodule(_focus_meter,ShadowOfWar.exe,F3 0F 10 8B 3C 02 00 00 F3 0F 10 93)
+alloc(new_foc,$1000,_focus_meter)
+label(cod_foc ret_foc)
+registersymbol(t_focus)
+alloc(t_focus,8)
+t_focus:
+dd 0
+
+new_foc:
+  cmp [t_focus],1
+  jne cod_foc
+  mov [rbx+238],(float)999
+  mov [rbx+23c],(float)999
+cod_foc:
+  movss xmm1,[rbx+23c]
+  jmp ret_foc
+
+_focus_meter:
+  jmp new_foc
+  nop 3
+ret_foc:
+registersymbol(_focus_meter)
+
+
+// --- 7. USO [FLECHAS ÉLFICAS] ---
+aobscanmodule(_elf_arrows,ShadowOfWar.exe,C9 48 03 C0 41 8B 84 C0 B0 00 00 00)
+alloc(new_arr,$1000,_elf_arrows)
+label(cod_arr ret_arr)
+registersymbol(t_arr)
+alloc(t_arr,8)
+t_arr:
+dd 0
+
+new_arr:
+  cmp [t_arr],1
+  jne cod_arr
+  mov [r8+rax*8+7c],(int)9
+  mov [r8+rax*8+b0],(int)10
+cod_arr:
+  mov eax,[r8+rax*8+b0]
+  jmp ret_arr
+
+_elf_arrows+04:
+  jmp new_arr
+  nop 3
+ret_arr:
+registersymbol(_elf_arrows)
+
+
+[DISABLE]
+
+dealloc(*)
+unregistersymbol(*)
+
+_character:
+  db F3 0F 10 80 2C 04 00 00
+_damage_one_hit_kill:
+  db F3 41 0F 10 8E 2C 04 00 00
+_hit_combo:
+  db 0F BF 80 88 01 00 00
+_might_gauge_combo:
+  db F3 0F 10 A1 D8 02 00 00
+_might_gauge_single:
+  db F3 0F 10 81 D0 02 00 00
+_elven_rage_meter_decrease:
+  db F3 0F 10 8B 10 03 00 00
+_elven_rage_meter_increase:
+  db F3 0F 11 A9 10 03 00 00
+_focus_meter:
+  db F3 0F 10 8B 3C 02 00 00
+_elf_arrows+04:
+  db 41 8B 84 C0 B0 00 00 00
+</AssemblerScript>
+      <CheatEntries>
+        <CheatEntry>
+          <ID>4772</ID>
+          <Description>"Personaje [Estadísticas]"</Description>
+          <Options moHideChildren="1" moDeactivateChildrenAsWell="1"/>
+          <Color>404080</Color>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript><![CDATA[// Contenedor visual del grupo
+[ENABLE]
+[DISABLE]
+]]></AssemblerScript>
+          <CheatEntries>
+            <CheatEntry>
+              <ID>4773</ID>
+              <Description>"Detección (Sigilo / Invisible)"</Description>
+              <DropDownList ReadOnly="1" DescriptionOnly="1" DisplayValueAsItem="1">1:Detección / Activada (Visible)
+0:Detección / Desactivada (Ininvisible / No detectado)
+</DropDownList>
+              <ShowAsSigned>0</ShowAsSigned>
+              <Color>008080</Color>
+              <VariableType>Auto Assembler Script</VariableType>
+              <AssemblerScript>[ENABLE]
+t_det:
+  dd 1
+[DISABLE]
+t_det:
+  dd 0
+              </AssemblerScript>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>4670</ID>
+              <Description>"Vida Infinita"</Description>
+              <ShowAsSigned>0</ShowAsSigned>
+              <Color>0000FF</Color>
+              <VariableType>Auto Assembler Script</VariableType>
+              <AssemblerScript>[ENABLE]
+t_hp:
+  dd 1
+[DISABLE]
+t_hp:
+  dd 0
+              </AssemblerScript>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>4672</ID>
+              <Description>"Salud Máxima (Puntero)"</Description>
+              <ShowAsSigned>0</ShowAsSigned>
+              <Color>8080FF</Color>
+              <VariableType>Float</VariableType>
+              <Address>_stats</Address>
+              <Offsets>
+                <Offset>428</Offset>
+              </Offsets>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>4774</ID>
+              <Description>"XP [Medidor / Experiencia]"</Description>
+              <ShowAsSigned>0</ShowAsSigned>
+              <Color>000080</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>_stats</Address>
+              <Offsets>
+                <Offset>56c</Offset>
+              </Offsets>
+            </CheatEntry>
+          </CheatEntries>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>4714</ID>
+          <Description>"Combate [Daño / Muerte de un golpe]"</Description>
+          <Color>FF8080</Color>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>[ENABLE]
+t_dmg:
+  dd 1
+[DISABLE]
+t_dmg:
+  dd 0
+</AssemblerScript>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>4675</ID>
+          <Description>"Combate [Combo de Golpes Fijo]"</Description>
+          <Color>800080</Color>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>[ENABLE]
+t_combo:
+  dd 1
+[DISABLE]
+t_combo:
+  dd 0
+</AssemblerScript>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>4750</ID>
+          <Description>"Barra [Might / Poder Infinito]"</Description>
+          <Color>0080FF</Color>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>[ENABLE]
+t_might:
+  dd 1
+[DISABLE]
+t_might:
+  dd 0
+</AssemblerScript>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>4706</ID>
+          <Description>"Medidor [Furia Élfica / Elven Rage]"</Description>
+          <Color>FF0000</Color>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>[ENABLE]
+t_rage:
+  dd 1
+[DISABLE]
+t_rage:
+  dd 0
+</AssemblerScript>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>4699</ID>
+          <Description>"Medidor [Focus / Concentración Infinita]"</Description>
+          <Color>FF0000</Color>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>[ENABLE]
+t_focus:
+  dd 1
+[DISABLE]
+t_focus:
+  dd 0
+</AssemblerScript>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>4685</ID>
+          <Description>"Uso [Flechas Élficas Infinitas]"</Description>
+          <Color>FF8000</Color>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>[ENABLE]
+t_arr:
+  dd 1
+[DISABLE]
+t_arr:
+  dd 0
+</AssemblerScript>
+        </CheatEntry>
+      </CheatEntries>
+    </CheatEntry>
+  </CheatEntries>
+  <UserdefinedSymbols/>
+</CheatTable>
