@@ -44,7 +44,7 @@ ret_hp:
 registersymbol(HP_Read)
 
 
-// --- 2. MIGHT JUGADOR (Llenado instantáneo + Infinito) ---
+// --- 2. MIGHT JUGADOR (Estable y sin parpadeos) ---
 aobscanmodule(Might,ShadowOfWar.exe,F3 0F 10 82 D0 02 00 00)
 alloc(new_might,$1000,Might)
 label(cod_might)
@@ -60,10 +60,9 @@ new_might:
   jne cod_might
   test rdx,rdx
   je cod_might
-  // Obtiene el valor máximo de might de la barra (offset 348)
+  // Fuerza estática del Might actual al valor máximo de la barra (offset 348)
   mov rax,[rdx+00000348]
-  // Fuerza el might actual al máximo de forma instantánea
-  movss [rdx+000002D0],rax
+  mov [rdx+000002D0],rax
 
 cod_might:
   pop rax
