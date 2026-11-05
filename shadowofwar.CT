@@ -6,43 +6,17 @@
       <Description>"Vida Infinita (Player HP)"</Description>
       <VariableType>Auto Assembler Script</VariableType>
       <AssemblerScript>{ Game   : ShadowOfWar.exe
-  Author : Reverser (Cleaned)
+  Compatible with DeckyTrainers (Static Hook)
 }
 
 [ENABLE]
-aobscanmodule(HP_Read,ShadowOfWar.exe,F3 0F 10 80 2C 04 00 00 48)
-alloc(newmem,$1000,HP_Read)
-
-label(code)
-label(return)
-
-newmem:
-  push rax
-  mov rax,[rcx+000026A8]
-  test rax,rax
-  je @F
-  // Fuerza la salud actual al valor máximo de salud (Max HP)
-  movss xmm0,[rax+00000428]
-  movss [rax+0000042C],xmm0
-@@:
-  pop rax
-
-code:
-  movss xmm0,[rax+0000042C]
-  jmp return
-
-HP_Read:
-  jmp newmem
-  nop 3
-return:
-registersymbol(HP_Read)
+// Inyección directa en la lectura de vida del jugador
+ShadowOfWar.exe+3573CE:
+  db F3 0F 10 40 28
 
 [DISABLE]
-HP_Read:
+ShadowOfWar.exe+3573CE:
   db F3 0F 10 80 2C 04 00 00
-
-unregistersymbol(HP_Read)
-dealloc(newmem)
 </AssemblerScript>
     </CheatEntry>
     <CheatEntry>
@@ -50,38 +24,16 @@ dealloc(newmem)
       <Description>"Might Infinito - Jugador (Player Might)"</Description>
       <VariableType>Auto Assembler Script</VariableType>
       <AssemblerScript>{ Game   : ShadowOfWar.exe
-  Author : Reverser (Cleaned)
+  Compatible with DeckyTrainers (Static Hook)
 }
 
 [ENABLE]
-aobscanmodule(Might,ShadowOfWar.exe,F3 0F 10 82 D0 02 00 00)
-alloc(newmem,$1000,Might)
-
-label(code)
-label(return)
-
-newmem:
-  push rax
-  mov rax,[rdx+00000348] // Obtiene el valor máximo de Might de la barra
-  movss [rdx+000002D0],rax // Lo fija como actual
-  pop rax
-
-code:
-  movss xmm0,[rdx+000002D0]
-  jmp return
-
-Might:
-  jmp newmem
-  nop 3
-return:
-registersymbol(Might)
+ShadowOfWar.exe+50F1EB:
+  db F3 0F 10 82 48 03 00 00
 
 [DISABLE]
-Might:
+ShadowOfWar.exe+50F1EB:
   db F3 0F 10 82 D0 02 00 00
-
-unregistersymbol(Might)
-dealloc(newmem)
 </AssemblerScript>
     </CheatEntry>
     <CheatEntry>
@@ -89,36 +41,16 @@ dealloc(newmem)
       <Description>"Might Infinito - Montura (Full Mount Might)"</Description>
       <VariableType>Auto Assembler Script</VariableType>
       <AssemblerScript>{ Game   : ShadowOfWar.exe
-  Author : Reverser (Cleaned)
+  Compatible with DeckyTrainers (Static Hook)
 }
 
 [ENABLE]
-aobscanmodule(mountMight,ShadowOfWar.exe,F3 0F 5D B1 30 03 00 00)
-alloc(newmem,$1000,mountMight)
-
-label(code)
-label(return)
-
-newmem:
-  // Fuerza el Might de la montura al máximo permitido
-  movss xmm6,[rcx+00000330]
-
-code:
-  minss xmm6,[rcx+00000330]
-  jmp return
-
-mountMight:
-  jmp newmem
-  nop 3
-return:
-registersymbol(mountMight)
+ShadowOfWar.exe+1A8D7F4:
+  db F3 0F 10 B1 30 03 00 00
 
 [DISABLE]
-mountMight:
+ShadowOfWar.exe+1A8D7F4:
   db F3 0F 5D B1 30 03 00 00
-
-unregistersymbol(mountMight)
-dealloc(newmem)
 </AssemblerScript>
     </CheatEntry>
     <CheatEntry>
@@ -126,37 +58,17 @@ dealloc(newmem)
       <Description>"Flechas Infinitas (Arrows)"</Description>
       <VariableType>Auto Assembler Script</VariableType>
       <AssemblerScript>{ Game   : ShadowOfWar.exe
-  Author : Reverser (Cleaned)
+  Compatible with DeckyTrainers (Static Hook)
 }
 
 [ENABLE]
-aobscanmodule(Arrow,ShadowOfWar.exe,3b ?? 0f 84 ?? ?? ?? ?? 89 ?? 88 00 00 00 49 ?? ?? e8 ?? ?? ?? ?? 48 ?? ?? 48 ?? ?? e8)
-alloc(newmem,$1000,Arrow)
-
-label(code)
-label(return)
-
-newmem:
-  // Fuerza los valores de las flechas al máximo cargado en el puntero
-  mov edx,[rcx+00000054]
-
-code:
-  mov [rcx+00000088],edx
-  mov rdx,r8
-  jmp return
-
-Arrow+8:
-  jmp newmem
-  nop
-return:
-registersymbol(Arrow)
+// Reemplaza el salto o resta por una operación nula para fijar las flechas
+ShadowOfWar.exe+EFD1BA:
+  db 90 90 90 90 90 90
 
 [DISABLE]
-Arrow+8:
+ShadowOfWar.exe+EFD1BA:
   db 89 91 88 00 00 00
-
-unregistersymbol(Arrow)
-dealloc(newmem)
 </AssemblerScript>
     </CheatEntry>
     <CheatEntry>
@@ -164,36 +76,16 @@ dealloc(newmem)
       <Description>"Focus Infinito (Full Focus)"</Description>
       <VariableType>Auto Assembler Script</VariableType>
       <AssemblerScript>{ Game   : ShadowOfWar.exe
-  Author : Reverser (Cleaned)
+  Compatible with DeckyTrainers (Static Hook)
 }
 
 [ENABLE]
-aobscanmodule(Focus,ShadowOfWar.exe,F3 0F 11 9B 3C 02 00 00)
-alloc(newmem,$1000,Focus)
-
-label(code)
-label(return)
-
-newmem:
-  // Fija la concentración al máximo de la barra (offset 0xA8)
-  movss xmm3,[rbx+000000A8]
-
-code:
-  movss [rbx+0000023C],xmm3
-  jmp return
-
-Focus:
-  jmp newmem
-  nop 3
-return:
-registersymbol(Focus)
+ShadowOfWar.exe+2E5DEE:
+  db F3 0F 10 9B A8 00 00 00
 
 [DISABLE]
-Focus:
+ShadowOfWar.exe+2E5DEE:
   db F3 0F 11 9B 3C 02 00 00
-
-unregistersymbol(Focus)
-dealloc(newmem)
 </AssemblerScript>
     </CheatEntry>
     <CheatEntry>
@@ -201,42 +93,17 @@ dealloc(newmem)
       <Description>"Hit Combo Infinito / Sin Reinicio"</Description>
       <VariableType>Auto Assembler Script</VariableType>
       <AssemblerScript>{ Game   : ShadowOfWar.exe
-  Author : Reverser (Cleaned)
+  Compatible with DeckyTrainers (Static Hook)
 }
 
 [ENABLE]
-aobscanmodule(hitCounter,ShadowOfWar.exe,66 89 B7 88 01 00 00)
-alloc(newmem,$1000,hitCounter)
-
-label(code)
-label(return)
-
-newmem:
-  // Comprueba si es el jugador mediante el offset de puntero válido
-  cmp [rdi+170],0
-  je code
-  
-  // Mantiene o incrementa el contador de golpes sin dejar que baje a 0
-  cmp si,[rdi+00000188]
-  jge code
-  mov si,[rdi+00000188]
-
-code:
-  mov [rdi+00000188],si
-  jmp return
-
-hitCounter:
-  jmp newmem
-  nop 2
-return:
-registersymbol(hitCounter)
+// Evita que el contador de golpes se resbale a cero convirtiéndolo en NOP
+ShadowOfWar.exe+4A715C:
+  db 66 90 90 90 90 90 90
 
 [DISABLE]
-hitCounter:
+ShadowOfWar.exe+4A715C:
   db 66 89 B7 88 01 00 00
-
-unregistersymbol(hitCounter)
-dealloc(newmem)
 </AssemblerScript>
     </CheatEntry>
   </CheatEntries>
