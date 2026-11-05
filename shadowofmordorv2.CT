@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CheatTable CheatEngineTableVersion="45">
+  <CheatEntries>
+    <CheatEntry>
+      <ID>999</ID>
+      <Description>"Script General - Shadow of War (Activar primero)"</Description>
+      <Options moHideChildren="1"/>
+      <Color>0000FF</Color>
+      <VariableType>Auto Assembler Script</VariableType>
+      <AssemblerScript>{ Game   : ShadowOfWar.exe
+  Author : Reverser / Adaptado y Corregido para DeckyTrainers
+}
+
+[ENABLE]
+
+// --- 1. VIDA INFINITA ---
+aobscanmodule(HP_Read,ShadowOfWar.exe,F3 0F 10 80 2C 04 00 00 48)
+alloc(new_hp,$1000,HP_Read)
+label(cod_hp)
+label(ret_hp)
+registersymbol(t_hp)
+alloc(t_hp,8)
+t_hp:
+dd 0
+
+new_hp:
+  push rax
+  cmp [t_hp],1
+  jne cod_hp
+  mov rax,[rcx+000026A8]
+  test rax,rax
+  je cod_hp
+  movss xmm0,[rax+00000428]
+  movss [rax+0000042C],xmm0
+cod_hp:
+  pop rax
+  movss xmm0,[rax+0000042C]
+  jmp ret_hp
+
+HP_Read:
+  jmp new_hp
+  nop 3
+ret_hp:
+registersymbol(HP_Read)
+
+
+// --- 2. MIGHT JUGADOR (Corregido para evitar parpadeos) ---
+aobscanmodule(Might,ShadowOfWar.exe,F3 0F 10 82 D0 02 00 00)
+alloc(new_might,$1000,Might)
+label(cod_might)
+label(ret_might)
+registersymbol(t_might)
+alloc(t_might,8)
+t_might:
+dd 0
+
+new_might:
+  push rax
+  cmp [t_might],1
+  jne cod_might
+  // Comprueba que el puntero base sea válido antes de fijar el might
+  test rdx,rdx
+  je cod_might
+  mov rax,[rdx+00000348] // Obtiene el valor máximo de la barra 1
+  comiss xmm0,rax        // Evita sobreescritura si ya está al máximo o superándolo
+  jae cod_might
+  movss [rdx+000002D0],rax // Fija el might actual al máximo de forma estable
+
+cod_might:
+  pop rax
+  movss xmm0,[rdx+000002D0]
+  jmp ret_might
+
+Might:
+  jmp new_might
+  nop 3
+ret_might:
+registersymbol(Might)
+
+
+// --- 3. MIGHT MONTURA (Corregido) ---
+aobscanmodule(mountMight,ShadowOfWar.exe,F3 0F 5D B1 30 03 00 00)
+alloc(new_mmight,$1000,mountMight)
+label(cod_mmight)
+label(ret_mmight)
+registersymbol(t_mmight)
+alloc(t_mmight,8)
+t_mmight:
+dd 0
+
+new_mmight:
+  cmp [t_mmight],1
+  jne cod_mmight
+  test rcx,rcx
+  je cod_mmight
+  // Fuerza el might de la montura al máximo sin causar conflicto de lectura
+  movss xmm6,[rcx+00000330]
+
+cod_mmight:
+  minss xmm6,[rcx+00000330]
+  jmp ret_mmight
+
+mountMight:
+  jmp new_mmight
+  nop 3
+ret_mmight:
+registersymbol(mountMight)
+
+
+// --- 4. FLECHAS INFINITAS ---
+aobscanmodule(Arrow,ShadowOfWar.exe,3b ?? 0f 84 ?? ?? ?? ?? 89 ?? 88 00 00 00 49 ?? ?? e8 ?? ?? ?? ?? 48 ?? ?? 48 ?? ?? e8)
+alloc(new_arrow,$1000,Arrow)
+label(cod_arrow)
+label(ret_arrow)
+registersymbol(t_arrow)
+alloc(t_arrow,8)
+t_arrow:
+dd 0
+
+new_arrow:
+  cmp [t_arrow],1
+  jne cod_arrow
+  mov edx,[rcx+00000054]
+cod_arrow:
+  mov [rcx+00000088],edx
+  mov rdx,r8
+  jmp ret_arrow
+
+Arrow+8:
+  jmp new_arrow
+  nop
+ret_arrow:
+registersymbol(Arrow)
+
+
+// --- 5. FOCUS INFINITO ---
+aobscanmodule(Focus,ShadowOfWar.exe,F3 0F 11 9B 3C 02 00 00)
+alloc(new_focus,$1000,Focus)
+label(cod_focus)
+label(ret_focus)
+registersymbol(t_focus)
+alloc(t_focus,8)
+t_focus:
+dd 0
+
+new_focus:
+  cmp [t_focus],1
+  jne cod_focus
+  movss xmm3,[rbx+000000A8]
+cod_focus:
+  movss [rbx+0000023C],xmm3
+  jmp ret_focus
+
+Focus:
+  jmp new_focus
+  nop 3
+ret_focus:
+registersymbol(Focus)
+
+
+// --- 6. HIT COMBO ---
+aobscanmodule(hitCounter,ShadowOfWar.exe,66 89 B7 88 01 00 00)
+alloc(new_combo,$1000,hitCounter)
+label(cod_combo)
+label(ret_combo)
+registersymbol(t_combo)
+alloc(t_combo,8)
+t_combo:
+dd 0
+
+new_combo:
+  cmp [t_combo],1
+  jne cod_combo
+  cmp [rdi+170],0
+  je cod_combo
+  cmp si,[rdi+00000188]
+  jge cod_combo
+  mov si,[rdi+00000188]
+cod_combo:
+  mov [rdi+00000188],si
+  jmp ret_combo
+
+hitCounter:
+  jmp new_combo
+  nop 2
+ret_combo:
+registersymbol(hitCounter)
+
+
+[DISABLE]
+
+HP_Read:
+  db F3 0F 10 80 2C 04 00 00
+unregistersymbol(HP_Read)
+dealloc(new_hp)
+unregistersymbol(t_hp)
+dealloc(t_hp)
+
+Might:
+  db F3 0F 10 82 D0 02 00 00
+unregistersymbol(Might)
+dealloc(new_might)
+unregistersymbol(t_might)
+dealloc(t_might)
+
+mountMight:
+  db F3 0F 5D B1 30 03 00 00
+unregistersymbol(mountMight)
+dealloc(new_mmight)
+unregistersymbol(t_mmight)
+dealloc(t_mmight)
+
+Arrow+8:
+  db 89 91 88 00 00 00
+unregistersymbol(Arrow)
+dealloc(new_arrow)
+unregistersymbol(t_arrow)
+dealloc(t_arrow)
+
+Focus:
+  db F3 0F 11 9B 3C 02 00 00
+unregistersymbol(Focus)
+dealloc(new_focus)
+unregistersymbol(t_focus)
+dealloc(t_focus)
+
+hitCounter:
+  db 66 89 B7 88 01 00 00
+unregistersymbol(hitCounter)
+dealloc(new_combo)
+unregistersymbol(t_combo)
+dealloc(t_combo)
+</AssemblerScript>
+      <CheatEntries>
+        <CheatEntry>
+          <ID>1001</ID>
+          <Description>"Vida Infinita"</Description>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>[ENABLE]
+t_hp:
+  dd 1
+[DISABLE]
+t_hp:
+  dd 0
+          </AssemblerScript>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>1002</ID>
+          <Description>"Might Infinito - Jugador"</Description>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>[ENABLE]
+t_might:
+  dd 1
+[DISABLE]
+t_might:
+  dd 0
+          </AssemblerScript>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>1003</ID>
+          <Description>"Might Infinito - Montura"</Description>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>[ENABLE]
+t_mmight:
+  dd 1
+[DISABLE]
+t_mmight:
+  dd 0
+          </AssemblerScript>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>1004</ID>
+          <Description>"Flechas Infinitas"</Description>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>[ENABLE]
+t_arrow:
+  dd 1
+[DISABLE]
+t_arrow:
+  dd 0
+          </AssemblerScript>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>1005</ID>
+          <Description>"Focus Infinito"</Description>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>[ENABLE]
+t_focus:
+  dd 1
+[DISABLE]
+t_focus:
+  dd 0
+          </AssemblerScript>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>1006</ID>
+          <Description>"Hit Combo Infinito"</Description>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>[ENABLE]
+t_combo:
+  dd 1
+[DISABLE]
+t_combo:
+  dd 0
+          </AssemblerScript>
+        </CheatEntry>
+      </CheatEntries>
+    </CheatEntry>
+  </CheatEntries>
+  <UserdefinedSymbols/>
+</CheatTable>
