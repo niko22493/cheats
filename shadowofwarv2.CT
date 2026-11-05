@@ -8,14 +8,14 @@
       <Color>0000FF</Color>
       <VariableType>Auto Assembler Script</VariableType>
       <AssemblerScript>{ Game   : ShadowOfWar.exe
-  Author : Reverser / Adaptado con los ganchos estables de la tabla original
+  Author : Reverser / Adaptado para DeckyTrainers
 }
 
 [ENABLE]
 
-// --- 1. VIDA INFINITA (Inmunidad total basada en la estructura original de combate) ---
-aobscanmodule(bIgnoreCombatDamage,ShadowOfWar.exe,48 8B 88 B0 6C 00 00 48 81)
-alloc(new_hp,$1000,bIgnoreCombatDamage)
+// --- 1. VIDA INFINITA (Restauración instantánea y bloqueo de daño) ---
+aobscanmodule(HP_Read,ShadowOfWar.exe,F3 0F 10 80 2C 04 00 00 48)
+alloc(new_hp,$1000,HP_Read)
 label(cod_hp)
 label(ret_hp)
 registersymbol(t_hp)
@@ -27,25 +27,25 @@ new_hp:
   push rax
   cmp [t_hp],1
   jne cod_hp
-  mov rax,[rax+00006CB0]
+  mov rax,[rcx+000026A8]
   test rax,rax
   je cod_hp
-  // Fuerza la mitigación de daño y regenera la salud instantáneamente al recibir impactos
-  mov dword ptr [rax+00006F58],(float)1.0
-
+  // Escribe de forma inmediata el valor máximo de salud (offset 428) sobre la actual (offset 42C)
+  movss xmm1,[rax+00000428]
+  movss [rax+0000042C],xmm1
 cod_hp:
   pop rax
-  mov rcx,[rax+00006CB0]
+  movss xmm0,[rax+0000042C]
   jmp ret_hp
 
-bIgnoreCombatDamage:
+HP_Read:
   jmp new_hp
-  nop 2
+  nop 3
 ret_hp:
-registersymbol(bIgnoreCombatDamage)
+registersymbol(HP_Read)
 
 
-// --- 2. MIGHT JUGADOR (Bloqueo absoluto de penalización de golpe de la tabla original) ---
+// --- 2. MIGHT JUGADOR (Forzado directo sin depender de rodar) ---
 aobscanmodule(Might,ShadowOfWar.exe,F3 0F 10 82 D0 02 00 00)
 alloc(new_might,$1000,Might)
 label(cod_might)
@@ -62,15 +62,16 @@ new_might:
   test rdx,rdx
   je cod_might
   
-  // Anula de forma permanente el delta de penalización por impacto enemigo (offset d8 de la tabla original)
+  // Anula cualquier penalización o retroceso de Might por golpes (offset d8)
   mov dword ptr [rdx+000000D8],0
   
-  // Fuerza el valor máximo de la barra al might actual para evitar cualquier caída por golpe
+  // Fuerza permanentemente el might actual al valor máximo de la barra (offset 348)
   mov rax,[rdx+00000348]
   mov [rdx+000002D0],rax
 
 cod_might:
   pop rax
+  // Fuerza al registro de salida a devolver siempre el máximo absoluto
   movss xmm0,[rdx+00000348]
   jmp ret_might
 
@@ -191,9 +192,9 @@ registersymbol(hitCounter)
 
 [DISABLE]
 
-bIgnoreCombatDamage:
-  db 48 8B 88 B0 6C 00 00
-unregistersymbol(bIgnoreCombatDamage)
+HP_Read:
+  db F3 0F 10 80 2C 04 00 00
+unregistersymbol(HP_Read)
 dealloc(new_hp)
 unregistersymbol(t_hp)
 dealloc(t_hp)
