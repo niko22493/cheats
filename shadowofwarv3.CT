@@ -8,7 +8,7 @@
       <Color>0000FF</Color>
       <VariableType>Auto Assembler Script</VariableType>
       <AssemblerScript>{ Game   : ShadowOfWar.exe
-  Author : Adaptado y traducido para DeckyTrainers (Script Maestro)
+  Author : Adaptado y optimizado para DeckyTrainers
 }
 
 [ENABLE]
@@ -37,14 +37,14 @@ new_char:
   // Detección / Invisibilidad
   cmp [t_det],1
   jne @F
-  mov byte ptr [rax+4a7],0 // Invisible (0 = Oculto)
+  mov byte ptr [rax+4a7],0
 @@:
 
   // Salud Infinita
   cmp [t_hp],1
   jne cod_char
-  movss xmm1,[rax+428] // Max HP
-  movss [rax+42c],xmm1 // Current HP fijado al máximo
+  movss xmm1,[rax+428]
+  movss [rax+42c],xmm1
 
 cod_char:
   movss xmm0,[rax+42c]
@@ -70,7 +70,7 @@ dd 0
 new_dmg:
   cmp [t_dmg],1
   jne cod_dmg
-  mov [r14+42c],(float)0 // Deja la salud del enemigo a 0 de un golpe
+  mov [r14+42c],(float)0
 cod_dmg:
   movss xmm1,[r14+42c]
   jmp ret_dmg
@@ -95,7 +95,7 @@ dd 0
 new_combo:
   cmp [t_combo],1
   jne cod_combo
-  mov [rax+188],(int)999 // Fija el combo a 999
+  mov [rax+188],(int)999
 cod_combo:
   movsx eax,word ptr [rax+188]
   jmp ret_combo
@@ -110,28 +110,29 @@ registersymbol(_hit_combo)
 // --- 4. BARRAS [MIGHT / PODER] ---
 aobscanmodule(_might_gauge_combo,ShadowOfWar.exe,F3 0F 10 A1 D8 02 00 00)
 aobscanmodule(_might_gauge_single,ShadowOfWar.exe,F3 0F 10 81 D0 02 00 00 0F)
-alloc(new_might_c,$1000,_might_gauge_combo)
-alloc(new_might_s,$1000,_might_gauge_single)
-label(ret_mc ret_ms)
+alloc(newmem_x,$100,_might_gauge_combo)
+alloc(newmem_y,$100,_might_gauge_single)
+label(return_x return_y)
 registersymbol(t_might)
 alloc(t_might,8)
 t_might:
 dd 0
 
-new_might_c:
+newmem_x:
   cmp [t_might],1
   jne @F
   mov [rcx+2d8],(float)999
 @@:
   movss xmm4,[rcx+2d8]
-  jmp ret_mc
+  jmp return_x
 
 _might_gauge_combo:
-  jmp new_might_c
+  jmp newmem_x
   nop 3
-ret_mc:
+return_x:
+registersymbol(_might_gauge_combo)
 
-new_might_s:
+newmem_y:
   cmp [t_might],1
   jne @F
   mov [rcx+2d0],(float)999
@@ -139,13 +140,13 @@ new_might_s:
   mov [rcx+3a8],(float)999
 @@:
   movss xmm0,[rcx+2d0]
-  jmp ret_ms
+  jmp return_y
 
 _might_gauge_single:
-  jmp new_might_s
+  jmp newmem_y
   nop 3
-ret_ms:
-registersymbol(_might_gauge_combo _might_gauge_single)
+return_y:
+registersymbol(_might_gauge_single)
 
 
 // --- 5. BARRAS [FURIA ÉLFICA / ELVEN RAGE] ---
@@ -171,6 +172,7 @@ _elven_rage_meter_decrease:
   jmp new_rage_dec
   nop 3
 ret_rd:
+registersymbol(_elven_rage_meter_decrease)
 
 new_rage_inc:
   cmp [t_rage],1
@@ -184,7 +186,7 @@ _elven_rage_meter_increase:
   jmp new_rage_inc
   nop 3
 ret_ri:
-registersymbol(_elven_rage_meter_decrease _elven_rage_meter_increase)
+registersymbol(_elven_rage_meter_increase)
 
 
 // --- 6. BARRAS [FOCUS / CONCENTRACIÓN] ---
@@ -239,27 +241,55 @@ registersymbol(_elf_arrows)
 
 [DISABLE]
 
-dealloc(*)
-unregistersymbol(*)
-
 _character:
   db F3 0F 10 80 2C 04 00 00
+unregistersymbol(_character _stats t_det t_hp)
+dealloc(new_char)
+dealloc(_stats)
+dealloc(t_det)
+dealloc(t_hp)
+
 _damage_one_hit_kill:
   db F3 41 0F 10 8E 2C 04 00 00
+unregistersymbol(_damage_one_hit_kill t_dmg)
+dealloc(new_dmg)
+dealloc(t_dmg)
+
 _hit_combo:
   db 0F BF 80 88 01 00 00
+unregistersymbol(_hit_combo t_combo)
+dealloc(new_combo)
+dealloc(t_combo)
+
 _might_gauge_combo:
   db F3 0F 10 A1 D8 02 00 00
 _might_gauge_single:
   db F3 0F 10 81 D0 02 00 00
+unregistersymbol(_might_gauge_combo _might_gauge_single t_might)
+dealloc(newmem_x)
+dealloc(newmem_y)
+dealloc(t_might)
+
 _elven_rage_meter_decrease:
   db F3 0F 10 8B 10 03 00 00
 _elven_rage_meter_increase:
   db F3 0F 11 A9 10 03 00 00
+unregistersymbol(_elven_rage_meter_decrease _elven_rage_meter_increase t_rage)
+dealloc(new_rage_dec)
+dealloc(new_rage_inc)
+dealloc(t_rage)
+
 _focus_meter:
   db F3 0F 10 8B 3C 02 00 00
+unregistersymbol(_focus_meter t_focus)
+dealloc(new_foc)
+dealloc(t_focus)
+
 _elf_arrows+04:
   db 41 8B 84 C0 B0 00 00 00
+unregistersymbol(_elf_arrows t_arr)
+dealloc(new_arr)
+dealloc(t_arr)
 </AssemblerScript>
       <CheatEntries>
         <CheatEntry>
@@ -268,8 +298,7 @@ _elf_arrows+04:
           <Options moHideChildren="1" moDeactivateChildrenAsWell="1"/>
           <Color>404080</Color>
           <VariableType>Auto Assembler Script</VariableType>
-          <AssemblerScript><![CDATA[// Contenedor visual del grupo
-[ENABLE]
+          <AssemblerScript><![CDATA[[ENABLE]
 [DISABLE]
 ]]></AssemblerScript>
           <CheatEntries>
@@ -277,7 +306,7 @@ _elf_arrows+04:
               <ID>4773</ID>
               <Description>"Detección (Sigilo / Invisible)"</Description>
               <DropDownList ReadOnly="1" DescriptionOnly="1" DisplayValueAsItem="1">1:Detección / Activada (Visible)
-0:Detección / Desactivada (Ininvisible / No detectado)
+0:Detección / Desactivada (Invisible / No detectado)
 </DropDownList>
               <ShowAsSigned>0</ShowAsSigned>
               <Color>008080</Color>
