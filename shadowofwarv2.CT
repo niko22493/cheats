@@ -44,7 +44,7 @@ ret_hp:
 registersymbol(HP_Read)
 
 
-// --- 2. MIGHT JUGADOR (Inmune a golpes y penalizaciones de daño) ---
+// --- 2. MIGHT JUGADOR (Inmune al primer golpe y penalizaciones) ---
 aobscanmodule(Might,ShadowOfWar.exe,F3 0F 10 82 D0 02 00 00)
 alloc(new_might,$1000,Might)
 label(cod_might)
@@ -61,16 +61,17 @@ new_might:
   test rdx,rdx
   je cod_might
   
-  // Anula cualquier penalización de might por recibir golpes (offset d8)
+  // Bloquea por completo el delta de penalización por daño
   mov dword ptr [rdx+000000D8],0
   
-  // Mantiene la barra fija al máximo absoluto
+  // Fuerza el might actual directamente al valor máximo de la barra (offset 348)
   mov rax,[rdx+00000348]
   mov [rdx+000002D0],rax
 
 cod_might:
   pop rax
-  movss xmm0,[rdx+000002D0]
+  // Carga directamente el valor máximo al registro de lectura flotante para evitar retrasos
+  movss xmm0,[rdx+00000348]
   jmp ret_might
 
 Might:
