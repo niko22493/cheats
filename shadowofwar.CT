@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CheatTable CheatEngineTableVersion="45">
+  <CheatEntries>
+    <CheatEntry>
+      <ID>40</ID>
+      <Description>"Vida Infinita (Player HP)"</Description>
+      <VariableType>Auto Assembler Script</VariableType>
+      <AssemblerScript>{ Game   : ShadowOfWar.exe
+  Author : Reverser (Cleaned)
+}
+
+[ENABLE]
+aobscanmodule(HP_Read,ShadowOfWar.exe,F3 0F 10 80 2C 04 00 00 48)
+alloc(newmem,$1000,HP_Read)
+
+label(code)
+label(return)
+
+newmem:
+  push rax
+  mov rax,[rcx+000026A8]
+  test rax,rax
+  je @F
+  // Fuerza la salud actual al valor máximo de salud (Max HP)
+  movss xmm0,[rax+00000428]
+  movss [rax+0000042C],xmm0
+@@:
+  pop rax
+
+code:
+  movss xmm0,[rax+0000042C]
+  jmp return
+
+HP_Read:
+  jmp newmem
+  nop 3
+return:
+registersymbol(HP_Read)
+
+[DISABLE]
+HP_Read:
+  db F3 0F 10 80 2C 04 00 00
+
+unregistersymbol(HP_Read)
+dealloc(newmem)
+</AssemblerScript>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>22</ID>
+      <Description>"Might Infinito - Jugador (Player Might)"</Description>
+      <VariableType>Auto Assembler Script</VariableType>
+      <AssemblerScript>{ Game   : ShadowOfWar.exe
+  Author : Reverser (Cleaned)
+}
+
+[ENABLE]
+aobscanmodule(Might,ShadowOfWar.exe,F3 0F 10 82 D0 02 00 00)
+alloc(newmem,$1000,Might)
+
+label(code)
+label(return)
+
+newmem:
+  push rax
+  mov rax,[rdx+00000348] // Obtiene el valor máximo de Might de la barra
+  movss [rdx+000002D0],rax // Lo fija como actual
+  pop rax
+
+code:
+  movss xmm0,[rdx+000002D0]
+  jmp return
+
+Might:
+  jmp newmem
+  nop 3
+return:
+registersymbol(Might)
+
+[DISABLE]
+Might:
+  db F3 0F 10 82 D0 02 00 00
+
+unregistersymbol(Might)
+dealloc(newmem)
+</AssemblerScript>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>4548</ID>
+      <Description>"Might Infinito - Montura (Full Mount Might)"</Description>
+      <VariableType>Auto Assembler Script</VariableType>
+      <AssemblerScript>{ Game   : ShadowOfWar.exe
+  Author : Reverser (Cleaned)
+}
+
+[ENABLE]
+aobscanmodule(mountMight,ShadowOfWar.exe,F3 0F 5D B1 30 03 00 00)
+alloc(newmem,$1000,mountMight)
+
+label(code)
+label(return)
+
+newmem:
+  // Fuerza el Might de la montura al máximo permitido
+  movss xmm6,[rcx+00000330]
+
+code:
+  minss xmm6,[rcx+00000330]
+  jmp return
+
+mountMight:
+  jmp newmem
+  nop 3
+return:
+registersymbol(mountMight)
+
+[DISABLE]
+mountMight:
+  db F3 0F 5D B1 30 03 00 00
+
+unregistersymbol(mountMight)
+dealloc(newmem)
+</AssemblerScript>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>1</ID>
+      <Description>"Flechas Infinitas (Arrows)"</Description>
+      <VariableType>Auto Assembler Script</VariableType>
+      <AssemblerScript>{ Game   : ShadowOfWar.exe
+  Author : Reverser (Cleaned)
+}
+
+[ENABLE]
+aobscanmodule(Arrow,ShadowOfWar.exe,3b ?? 0f 84 ?? ?? ?? ?? 89 ?? 88 00 00 00 49 ?? ?? e8 ?? ?? ?? ?? 48 ?? ?? 48 ?? ?? e8)
+alloc(newmem,$1000,Arrow)
+
+label(code)
+label(return)
+
+newmem:
+  // Fuerza los valores de las flechas al máximo cargado en el puntero
+  mov edx,[rcx+00000054]
+
+code:
+  mov [rcx+00000088],edx
+  mov rdx,r8
+  jmp return
+
+Arrow+8:
+  jmp newmem
+  nop
+return:
+registersymbol(Arrow)
+
+[DISABLE]
+Arrow+8:
+  db 89 91 88 00 00 00
+
+unregistersymbol(Arrow)
+dealloc(newmem)
+</AssemblerScript>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>54</ID>
+      <Description>"Focus Infinito (Full Focus)"</Description>
+      <VariableType>Auto Assembler Script</VariableType>
+      <AssemblerScript>{ Game   : ShadowOfWar.exe
+  Author : Reverser (Cleaned)
+}
+
+[ENABLE]
+aobscanmodule(Focus,ShadowOfWar.exe,F3 0F 11 9B 3C 02 00 00)
+alloc(newmem,$1000,Focus)
+
+label(code)
+label(return)
+
+newmem:
+  // Fija la concentración al máximo de la barra (offset 0xA8)
+  movss xmm3,[rbx+000000A8]
+
+code:
+  movss [rbx+0000023C],xmm3
+  jmp return
+
+Focus:
+  jmp newmem
+  nop 3
+return:
+registersymbol(Focus)
+
+[DISABLE]
+Focus:
+  db F3 0F 11 9B 3C 02 00 00
+
+unregistersymbol(Focus)
+dealloc(newmem)
+</AssemblerScript>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>6</ID>
+      <Description>"Hit Combo Infinito / Sin Reinicio"</Description>
+      <VariableType>Auto Assembler Script</VariableType>
+      <AssemblerScript>{ Game   : ShadowOfWar.exe
+  Author : Reverser (Cleaned)
+}
+
+[ENABLE]
+aobscanmodule(hitCounter,ShadowOfWar.exe,66 89 B7 88 01 00 00)
+alloc(newmem,$1000,hitCounter)
+
+label(code)
+label(return)
+
+newmem:
+  // Comprueba si es el jugador mediante el offset de puntero válido
+  cmp [rdi+170],0
+  je code
+  
+  // Mantiene o incrementa el contador de golpes sin dejar que baje a 0
+  cmp si,[rdi+00000188]
+  jge code
+  mov si,[rdi+00000188]
+
+code:
+  mov [rdi+00000188],si
+  jmp return
+
+hitCounter:
+  jmp newmem
+  nop 2
+return:
+registersymbol(hitCounter)
+
+[DISABLE]
+hitCounter:
+  db 66 89 B7 88 01 00 00
+
+unregistersymbol(hitCounter)
+dealloc(newmem)
+</AssemblerScript>
+    </CheatEntry>
+  </CheatEntries>
+  <UserdefinedSymbols/>
+</CheatTable>
