@@ -8,12 +8,12 @@
       <Color>0000FF</Color>
       <VariableType>Auto Assembler Script</VariableType>
       <AssemblerScript>{ Game   : ShadowOfWar.exe
-  Author : Reverser / Adaptado para DeckyTrainers
+  Author : Reverser / Adaptado para DeckyTrainers (Inmunidad total al primer golpe)
 }
 
 [ENABLE]
 
-// --- 1. VIDA INFINITA ---
+// --- 1. VIDA INFINITA (Bloqueo absoluto de daño desde el primer golpe) ---
 aobscanmodule(HP_Read,ShadowOfWar.exe,F3 0F 10 80 2C 04 00 00 48)
 alloc(new_hp,$1000,HP_Read)
 label(cod_hp)
@@ -30,11 +30,13 @@ new_hp:
   mov rax,[rcx+000026A8]
   test rax,rax
   je cod_hp
+  // Fuerza directamente la vida actual (offset 42C) al máximo absoluto (offset 428)
   movss xmm0,[rax+00000428]
   movss [rax+0000042C],xmm0
 cod_hp:
   pop rax
-  movss xmm0,[rax+0000042C]
+  // Carga siempre el valor máximo directamente al registro flotante de salida
+  movss xmm0,[rax+00000428]
   jmp ret_hp
 
 HP_Read:
@@ -44,7 +46,7 @@ ret_hp:
 registersymbol(HP_Read)
 
 
-// --- 2. MIGHT JUGADOR (Escritura y bloqueo permanente instantáneo) ---
+// --- 2. MIGHT JUGADOR (Bloqueo absoluto y escritura fija) ---
 aobscanmodule(Might,ShadowOfWar.exe,F3 0F 10 82 D0 02 00 00)
 alloc(new_might,$1000,Might)
 label(cod_might)
@@ -61,16 +63,16 @@ new_might:
   test rdx,rdx
   je cod_might
   
-  // Anula penalizaciones por daño o interrupciones de golpe
+  // Anula cualquier penalización o drenaje por golpe
   mov dword ptr [rdx+000000D8],0
   
-  // Fuerza el valor máximo de la barra (offset 348) directamente sobre el might actual (offset 2D0)
+  // Fuerza el Might actual al máximo de la barra
   mov rax,[rdx+00000348]
   mov [rdx+000002D0],rax
 
 cod_might:
   pop rax
-  // Carga directamente el valor máximo al registro flotante para la interfaz
+  // Fuerza el registro de salida a leer siempre el máximo absoluto
   movss xmm0,[rdx+00000348]
   jmp ret_might
 
