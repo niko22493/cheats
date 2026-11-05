@@ -8,7 +8,7 @@
       <Color>0000FF</Color>
       <VariableType>Auto Assembler Script</VariableType>
       <AssemblerScript>{ Game   : ShadowOfWar.exe
-  Author : Reverser / Adaptado y Corregido para DeckyTrainers
+  Author : Reverser / Adaptado para DeckyTrainers
 }
 
 [ENABLE]
@@ -44,7 +44,7 @@ ret_hp:
 registersymbol(HP_Read)
 
 
-// --- 2. MIGHT JUGADOR (Corregido para evitar parpadeos) ---
+// --- 2. MIGHT JUGADOR (Llenado instantáneo + Infinito) ---
 aobscanmodule(Might,ShadowOfWar.exe,F3 0F 10 82 D0 02 00 00)
 alloc(new_might,$1000,Might)
 label(cod_might)
@@ -58,13 +58,12 @@ new_might:
   push rax
   cmp [t_might],1
   jne cod_might
-  // Comprueba que el puntero base sea válido antes de fijar el might
   test rdx,rdx
   je cod_might
-  mov rax,[rdx+00000348] // Obtiene el valor máximo de la barra 1
-  comiss xmm0,rax        // Evita sobreescritura si ya está al máximo o superándolo
-  jae cod_might
-  movss [rdx+000002D0],rax // Fija el might actual al máximo de forma estable
+  // Obtiene el valor máximo de might de la barra (offset 348)
+  mov rax,[rdx+00000348]
+  // Fuerza el might actual al máximo de forma instantánea
+  movss [rdx+000002D0],rax
 
 cod_might:
   pop rax
@@ -78,7 +77,7 @@ ret_might:
 registersymbol(Might)
 
 
-// --- 3. MIGHT MONTURA (Corregido) ---
+// --- 3. MIGHT MONTURA ---
 aobscanmodule(mountMight,ShadowOfWar.exe,F3 0F 5D B1 30 03 00 00)
 alloc(new_mmight,$1000,mountMight)
 label(cod_mmight)
@@ -93,7 +92,6 @@ new_mmight:
   jne cod_mmight
   test rcx,rcx
   je cod_mmight
-  // Fuerza el might de la montura al máximo sin causar conflicto de lectura
   movss xmm6,[rcx+00000330]
 
 cod_mmight:
