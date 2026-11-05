@@ -2,227 +2,80 @@
 <CheatTable CheatEngineTableVersion="45">
   <CheatEntries>
     <CheatEntry>
-      <ID>999</ID>
-      <Description>"Script General - Shadow of War (Activar primero)"</Description>
-      <Options moHideChildren="1"/>
-      <Color>0000FF</Color>
+      <ID>4670</ID>
+      <Description>"Vida Infinita (Salud siempre al máximo)"</Description>
       <VariableType>Auto Assembler Script</VariableType>
-      <AssemblerScript>{ Game   : ShadowOfWar.exe
-  Author : Adaptado para DeckyTrainers (Formato Compacto Estable)
-}
-
-[ENABLE]
-
-// --- 1. PERSONAJE [ESTADÍSTICAS / SALUD / DETECCIÓN] ---
+      <AssemblerScript>[ENABLE]
 aobscanmodule(_character,ShadowOfWar.exe,F3 0F 10 80 2C 04 00 00 48)
-alloc(new_char,$1000,_character)
-registersymbol(_stats)
-alloc(_stats,8)
-label(cod_char)
-label(ret_char)
-
-registersymbol(t_det)
-alloc(t_det,8)
-t_det:
-dd 0
-
-registersymbol(t_hp)
-alloc(t_hp,8)
-t_hp:
-dd 0
-
-new_char:
-  mov [_stats],rax
-  
-  // Detección / Invisibilidad
-  cmp [t_det],1
-  jne @F
-  mov byte ptr [rax+4a7],0
-@@:
-
-  // Salud Infinita
-  cmp [t_hp],1
-  jne cod_char
+alloc(new_hp,$100,_character)
+label(return)
+registersymbol(_character)
+new_hp:
   movss xmm1,[rax+428]
   movss [rax+42c],xmm1
-
-cod_char:
   movss xmm0,[rax+42c]
-  jmp ret_char
-
+  jmp return
 _character:
-  jmp new_char
+  jmp new_hp
   nop 3
-ret_char:
-registersymbol(_character)
-
-
-// --- 2. BARRAS [MIGHT / PODER] ---
+return:
+[DISABLE]
+_character:
+  db F3 0F 10 80 2C 04 00 00
+dealloc(new_hp)
+unregistersymbol(_character)
+</AssemblerScript>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>4750</ID>
+      <Description>"Barra Might / Poder Infinito"</Description>
+      <VariableType>Auto Assembler Script</VariableType>
+      <AssemblerScript>[ENABLE]
 aobscanmodule(_might_gauge_single,ShadowOfWar.exe,F3 0F 10 81 D0 02 00 00 0F)
-alloc(new_might,$1000,_might_gauge_single)
-label(cod_might ret_might)
-registersymbol(t_might)
-alloc(t_might,8)
-t_might:
-dd 0
-
+alloc(new_might,$100,_might_gauge_single)
+label(return)
+registersymbol(_might_gauge_single)
 new_might:
-  cmp [t_might],1
-  jne cod_might
   mov [rcx+2d0],(float)999
   mov [rcx+348],(float)999
   mov [rcx+3a8],(float)999
-cod_might:
   movss xmm0,[rcx+2d0]
-  jmp ret_might
-
+  jmp return
 _might_gauge_single:
   jmp new_might
   nop 3
-ret_might:
-registersymbol(_might_gauge_single)
-
-
-// --- 3. BARRAS [FOCUS / CONCENTRACIÓN] ---
+return:
+[DISABLE]
+_might_gauge_single:
+  db F3 0F 10 81 D0 02 00 00
+dealloc(new_might)
+unregistersymbol(_might_gauge_single)
+</AssemblerScript>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>4699</ID>
+      <Description>"Medidor Focus / Concentración Infinita"</Description>
+      <VariableType>Auto Assembler Script</VariableType>
+      <AssemblerScript>[ENABLE]
 aobscanmodule(_focus_meter,ShadowOfWar.exe,F3 0F 10 8B 3C 02 00 00 F3 0F 10 93)
-alloc(new_foc,$1000,_focus_meter)
-label(cod_foc ret_foc)
-registersymbol(t_focus)
-alloc(t_focus,8)
-t_focus:
-dd 0
-
+alloc(new_foc,$100,_focus_meter)
+label(return)
+registersymbol(_focus_meter)
 new_foc:
-  cmp [t_focus],1
-  jne cod_foc
   mov [rbx+238],(float)999
   mov [rbx+23c],(float)999
-cod_foc:
   movss xmm1,[rbx+23c]
-  jmp ret_foc
-
+  jmp return
 _focus_meter:
   jmp new_foc
   nop 3
-ret_foc:
-registersymbol(_focus_meter)
-
-
+return:
 [DISABLE]
-
-_character:
-  db F3 0F 10 80 2C 04 00 00
-unregistersymbol(_character _stats t_det t_hp)
-dealloc(new_char)
-dealloc(_stats)
-dealloc(t_det)
-dealloc(t_hp)
-
-_might_gauge_single:
-  db F3 0F 10 81 D0 02 00 00
-unregistersymbol(_might_gauge_single t_might)
-dealloc(new_might)
-dealloc(t_might)
-
 _focus_meter:
   db F3 0F 10 8B 3C 02 00 00
-unregistersymbol(_focus_meter t_focus)
 dealloc(new_foc)
-dealloc(t_focus)
+unregistersymbol(_focus_meter)
 </AssemblerScript>
-      <CheatEntries>
-        <CheatEntry>
-          <ID>4772</ID>
-          <Description>"Personaje [Estadísticas]"</Description>
-          <Options moHideChildren="1" moDeactivateChildrenAsWell="1"/>
-          <Color>404080</Color>
-          <VariableType>Auto Assembler Script</VariableType>
-          <AssemblerScript><![CDATA[[ENABLE]
-[DISABLE]
-]]></AssemblerScript>
-          <CheatEntries>
-            <CheatEntry>
-              <ID>4773</ID>
-              <Description>"Detección (Sigilo / Invisible)"</Description>
-              <DropDownList ReadOnly="1" DescriptionOnly="1" DisplayValueAsItem="1">1:Detección / Activada (Visible)
-0:Detección / Desactivada (Invisible / No detectado)
-</DropDownList>
-              <ShowAsSigned>0</ShowAsSigned>
-              <Color>008080</Color>
-              <VariableType>Auto Assembler Script</VariableType>
-              <AssemblerScript>[ENABLE]
-t_det:
-  dd 1
-[DISABLE]
-t_det:
-  dd 0
-              </AssemblerScript>
-            </CheatEntry>
-            <CheatEntry>
-              <ID>4670</ID>
-              <Description>"Vida Infinita"</Description>
-              <ShowAsSigned>0</ShowAsSigned>
-              <Color>0000FF</Color>
-              <VariableType>Auto Assembler Script</VariableType>
-              <AssemblerScript>[ENABLE]
-t_hp:
-  dd 1
-[DISABLE]
-t_hp:
-  dd 0
-              </AssemblerScript>
-            </CheatEntry>
-            <CheatEntry>
-              <ID>4672</ID>
-              <Description>"Salud Máxima (Puntero)"</Description>
-              <ShowAsSigned>0</ShowAsSigned>
-              <Color>8080FF</Color>
-              <VariableType>Float</VariableType>
-              <Address>_stats</Address>
-              <Offsets>
-                <Offset>428</Offset>
-              </Offsets>
-            </CheatEntry>
-            <CheatEntry>
-              <ID>4774</ID>
-              <Description>"XP [Medidor / Experiencia]"</Description>
-              <ShowAsSigned>0</ShowAsSigned>
-              <Color>000080</Color>
-              <VariableType>4 Bytes</VariableType>
-              <Address>_stats</Address>
-              <Offsets>
-                <Offset>56c</Offset>
-              </Offsets>
-            </CheatEntry>
-          </CheatEntries>
-        </CheatEntry>
-        <CheatEntry>
-          <ID>4750</ID>
-          <Description>"Barra [Might / Poder Infinito]"</Description>
-          <Color>0080FF</Color>
-          <VariableType>Auto Assembler Script</VariableType>
-          <AssemblerScript>[ENABLE]
-t_might:
-  dd 1
-[DISABLE]
-t_might:
-  dd 0
-</AssemblerScript>
-        </CheatEntry>
-        <CheatEntry>
-          <ID>4699</ID>
-          <Description>"Medidor [Focus / Concentración Infinita]"</Description>
-          <Color>FF0000</Color>
-          <VariableType>Auto Assembler Script</VariableType>
-          <AssemblerScript>[ENABLE]
-t_focus:
-  dd 1
-[DISABLE]
-t_focus:
-  dd 0
-</AssemblerScript>
-        </CheatEntry>
-      </CheatEntries>
     </CheatEntry>
   </CheatEntries>
   <UserdefinedSymbols/>
